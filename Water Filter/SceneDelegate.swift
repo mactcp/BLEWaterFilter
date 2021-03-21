@@ -1,6 +1,6 @@
 //
 //  SceneDelegate.swift
-//  Aquasana
+//  WaterFilter
 //
 //  Created by Glenn on 3/18/21.
 //

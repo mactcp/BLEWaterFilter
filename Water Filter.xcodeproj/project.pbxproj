@@ -13,10 +13,11 @@
 		21F5208F2604026B00D64F8E /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 21F5208D2604026B00D64F8E /* Main.storyboard */; };
 		21F520912604026D00D64F8E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 21F520902604026D00D64F8E /* Assets.xcassets */; };
 		21F520942604026D00D64F8E /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 21F520922604026D00D64F8E /* LaunchScreen.storyboard */; };
+		21F5209F2604213400D64F8E /* CoreBluetoothCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21F5209E2604213400D64F8E /* CoreBluetoothCache.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		21F520842604026B00D64F8E /* Aquasana.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Aquasana.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		21F520842604026B00D64F8E /* Water Filter.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Water Filter.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		21F520872604026B00D64F8E /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		21F520892604026B00D64F8E /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		21F5208B2604026B00D64F8E /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -24,6 +25,8 @@
 		21F520902604026D00D64F8E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		21F520932604026D00D64F8E /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		21F520952604026D00D64F8E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		21F5209C2604028600D64F8E /* WaterFilter.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = WaterFilter.entitlements; sourceTree = "<group>"; };
+		21F5209E2604213400D64F8E /* CoreBluetoothCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreBluetoothCache.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -40,7 +43,7 @@
 		21F5207B2604026B00D64F8E = {
 			isa = PBXGroup;
 			children = (
-				21F520862604026B00D64F8E /* Aquasana */,
+				21F520862604026B00D64F8E /* Water Filter */,
 				21F520852604026B00D64F8E /* Products */,
 			);
 			sourceTree = "<group>";
@@ -48,31 +51,33 @@
 		21F520852604026B00D64F8E /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				21F520842604026B00D64F8E /* Aquasana.app */,
+				21F520842604026B00D64F8E /* Water Filter.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		21F520862604026B00D64F8E /* Aquasana */ = {
+		21F520862604026B00D64F8E /* Water Filter */ = {
 			isa = PBXGroup;
 			children = (
+				21F5209C2604028600D64F8E /* WaterFilter.entitlements */,
 				21F520872604026B00D64F8E /* AppDelegate.swift */,
 				21F520892604026B00D64F8E /* SceneDelegate.swift */,
 				21F5208B2604026B00D64F8E /* ViewController.swift */,
+				21F5209E2604213400D64F8E /* CoreBluetoothCache.swift */,
 				21F5208D2604026B00D64F8E /* Main.storyboard */,
 				21F520902604026D00D64F8E /* Assets.xcassets */,
 				21F520922604026D00D64F8E /* LaunchScreen.storyboard */,
 				21F520952604026D00D64F8E /* Info.plist */,
 			);
-			path = Aquasana;
+			path = "Water Filter";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		21F520832604026B00D64F8E /* Aquasana */ = {
+		21F520832604026B00D64F8E /* Water Filter */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 21F520982604026D00D64F8E /* Build configuration list for PBXNativeTarget "Aquasana" */;
+			buildConfigurationList = 21F520982604026D00D64F8E /* Build configuration list for PBXNativeTarget "Water Filter" */;
 			buildPhases = (
 				21F520802604026B00D64F8E /* Sources */,
 				21F520812604026B00D64F8E /* Frameworks */,
@@ -82,9 +87,9 @@
 			);
 			dependencies = (
 			);
-			name = Aquasana;
+			name = "Water Filter";
 			productName = Aquasana;
-			productReference = 21F520842604026B00D64F8E /* Aquasana.app */;
+			productReference = 21F520842604026B00D64F8E /* Water Filter.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -101,7 +106,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 21F5207F2604026B00D64F8E /* Build configuration list for PBXProject "Aquasana" */;
+			buildConfigurationList = 21F5207F2604026B00D64F8E /* Build configuration list for PBXProject "Water Filter" */;
 			compatibilityVersion = "Xcode 9.3";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -114,7 +119,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				21F520832604026B00D64F8E /* Aquasana */,
+				21F520832604026B00D64F8E /* Water Filter */,
 			);
 		};
 /* End PBXProject section */
@@ -139,6 +144,7 @@
 			files = (
 				21F5208C2604026B00D64F8E /* ViewController.swift in Sources */,
 				21F520882604026B00D64F8E /* AppDelegate.swift in Sources */,
+				21F5209F2604213400D64F8E /* CoreBluetoothCache.swift in Sources */,
 				21F5208A2604026B00D64F8E /* SceneDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -286,17 +292,19 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "Water Filter/WaterFilter.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = DVZXTVFQWE;
-				INFOPLIST_FILE = Aquasana/Info.plist;
+				DEVELOPMENT_TEAM = NDRUTXQVKC;
+				INFOPLIST_FILE = "Water Filter/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = net.mactcp.Aquasana;
+				PRODUCT_BUNDLE_IDENTIFIER = net.mactcp.WaterFilter;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTS_MACCATALYST = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = "1,2,6";
 			};
 			name = Debug;
 		};
@@ -305,24 +313,26 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "Water Filter/WaterFilter.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = DVZXTVFQWE;
-				INFOPLIST_FILE = Aquasana/Info.plist;
+				DEVELOPMENT_TEAM = NDRUTXQVKC;
+				INFOPLIST_FILE = "Water Filter/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = net.mactcp.Aquasana;
+				PRODUCT_BUNDLE_IDENTIFIER = net.mactcp.WaterFilter;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTS_MACCATALYST = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = "1,2,6";
 			};
 			name = Release;
 		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		21F5207F2604026B00D64F8E /* Build configuration list for PBXProject "Aquasana" */ = {
+		21F5207F2604026B00D64F8E /* Build configuration list for PBXProject "Water Filter" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				21F520962604026D00D64F8E /* Debug */,
@@ -331,7 +341,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		21F520982604026D00D64F8E /* Build configuration list for PBXNativeTarget "Aquasana" */ = {
+		21F520982604026D00D64F8E /* Build configuration list for PBXNativeTarget "Water Filter" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				21F520992604026D00D64F8E /* Debug */,
