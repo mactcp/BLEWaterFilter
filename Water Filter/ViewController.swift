@@ -29,6 +29,43 @@ import CoreBluetooth
 <bd00000d c40f000d 598701>
 <bd00000d c40f000d 688801>
 <bd00000d c40f000d 688801> 25%
+<bd00000d c40f000d 748801>
+<bd00000d c40f000d 768801>
+<bd00000d c40f000d 778801>
+<bd00000d c40f000d 7a8801>
+<bd00000d c40f000d 7b8801>
+<bd00000d c40f000d 8c8801>
+<bd00000d c40f000d 8f8801>
+<bd00000d c40f000d 918801>
+<bd00000d c40f000d 928801>
+<bd00000d c40f000d 9e8901> 24%
+<bd00000d c40f000d a28901>
+<bd00000d c40f000d a38901> 24%
+<bd00000d c40f000d a78901>
+<bd00000d c40f000d a88901>
+<bd00000d c40f000d b18a01>
+<bd00000d c40f000d b28a01>
+<bd00000d c40f000d b88a01>
+<bd00000d c40f000d bf8a01>
+<bd00000d c40f000d c28a01>
+<bd00000d c40f000d ce8b01>
+<bd00000d c40f000d d18b01>
+<bd00000d c40f000d db8b01>
+<bd00000d c40f000d dc8b01> 24%
+<bd00000d c40f000d e08c01>
+<bd00000d c40f000d e38c01>
+<bd00000d c40f000d ec8c01>
+<bd00000d c40f000d f08c01>
+<bd00000d c40f000d f18d01> 23%
+<bd00000d c40f000e 038d01> 22%
+<bd00000d c40f000e 0a8d01>
+<bd00000d c40f000e 398f01>
+<bd00000d c40f000e 468f01> 21%
+<bd00000d c40f000e 519001>
+<bd00000d c40f000e 549001>
+<bd00000d c40f000e 5a9101> 20%
+<bd00000d c40f000e 5b9101>
+<bd00000d c40f000e 609101> 20%
 
 Advertising Address: c1:1c:4d:4f:45:a5 (c1:1c:4d:4f:45:a5)
 Manufacturer Specific: Apple (length 26, type 0xFF, 0x004C
@@ -38,21 +75,41 @@ Advertising Address: c2:1c:4d:4f:45:a5 (c2:1c:4d:4f:45:a5)
 Data: 0215 249bf7f4546c1801ba01001c4d4d98a6 000d c40f b6
 */
 
-struct Peripheral: Comparable {
-	static func < (lhs: Peripheral, rhs: Peripheral) -> Bool {
-		return lhs.name < rhs.name
+let beaconUUID1Bytes: uuid_t = (0x00, 0x00, 0x00, 0x00, 0x70, 0x62, 0x10, 0x01, 0xb0, 0x00, 0x00, 0x1c, 0x4d, 0x8a, 0xa7, 0x6c)
+let beaconUUID2Bytes: uuid_t = (0x24, 0x9b, 0xf7, 0xf4, 0x54, 0x6c, 0x18, 0x01, 0xba, 0x01, 0x00, 0x1c, 0x4d, 0x4d, 0x98, 0xa6)
+
+struct WaterFilter: Comparable {
+	static func < (lhs: WaterFilter, rhs: WaterFilter) -> Bool {
+		let nameComparisonResult = lhs.name.compare(rhs.name)
+		if nameComparisonResult == .orderedSame {
+			if lhs.volume == rhs.volume {
+				return lhs.days < rhs.days
+			} else {
+				return lhs.volume < rhs.volume
+			}
+		} else {
+			return nameComparisonResult == .orderedAscending
+		}
 	}
 	
-	let name: String
+	var name: String
+	var volume: UInt32
+	var days: UInt8
 }
 
-class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, CBCentralManagerDelegate {
-	let bluetoothCache = CoreBluetoothCache()
+class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, CBCentralManagerDelegate, CLLocationManagerDelegate {
+	let beaconUUID1 = UUID(uuid: beaconUUID1Bytes)
+	let beaconUUID2 = UUID(uuid: beaconUUID2Bytes)
+
 	@IBOutlet weak var tableView: UITableView!
+
+	let bluetoothCache = CoreBluetoothCache()
 	var central: CBCentralManager!
-	var peripherals: [UUID:Peripheral] = [:]
+	var peripherals: [UUID:WaterFilter] = [:]
 	var displayOrder: [UUID] = []
 	let aquasanaUUID = CBUUID(data: Data([0xFE, 0xF8]))
+
+	var locationManager: CLLocationManager!
 
 	override func viewDidLoad() {
 		super.viewDidLoad()
@@ -60,9 +117,14 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
 		
 		central = CBCentralManager()
 		central.delegate = self
+
+		locationManager = CLLocationManager()
+		locationManager.delegate = self
+		locationManager.desiredAccuracy = kCLLocationAccuracyBestForNavigation
+		locationManager.activityType = .other
 	}
 
-	func centralManagerDidUpdateState(_ central: CBCentralManager) {
+	internal func centralManagerDidUpdateState(_ central: CBCentralManager) {
 		switch central.state {
 		case .poweredOn:
 			print("CBCentral state poweredOn")
@@ -83,39 +145,95 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
 		}
 	}
 
-	func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String : Any], rssi RSSI: NSNumber) {
-		print("Discovered \(peripheral.identifier)")
+	internal func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String : Any], rssi RSSI: NSNumber) {
+		print("Discovered \(String(describing: peripheral.name)) \(peripheral.identifier)")
 		let identifier = peripheral.identifier
-		let manufacturerData = advertisementData[CBAdvertisementDataManufacturerDataKey]
-		print("ManufacturerData: \(manufacturerData)")
-		let name = peripheral.name ?? identifier.uuidString
-		let displayData = Peripheral(name: name)
-		if let currentData = peripherals[identifier] {
-			if displayData != currentData {
-				let indexPath = IndexPath(row: displayOrder.firstIndex(of: identifier)!, section: 0)
+		if let manufacturerData = advertisementData[CBAdvertisementDataManufacturerDataKey] as? Data, manufacturerData[0] == 0xbd, manufacturerData[1] == 0x00 {
+			print("ManufacturerData: \(manufacturerData)")
+			let name = peripheral.name ?? identifier.uuidString
+			let volume: UInt32 = (UInt32(manufacturerData[7]) << 8) | UInt32(manufacturerData[8])
+			let days = manufacturerData[9]
+			let displayData = WaterFilter(name: name, volume: volume, days: days)
+			if let currentData = peripherals[identifier] {
+				if displayData != currentData {
+					let indexPath = IndexPath(row: displayOrder.firstIndex(of: identifier)!, section: 0)
+					peripherals[identifier] = displayData
+					tableView.reloadRows(at: [indexPath], with: .automatic)
+				}
+			} else {
+				print("New \(peripheral) \(advertisementData) \(RSSI)")
 				peripherals[identifier] = displayData
-				tableView.reloadRows(at: [indexPath], with: .automatic)
+				let indexPath = IndexPath(row: displayOrder.count, section: 0)
+				displayOrder.append(identifier)
+				tableView.insertRows(at: [indexPath], with: .automatic)
 			}
-		} else {
-			print("New \(peripheral) \(advertisementData) \(RSSI)")
-			let indexPath = IndexPath(row: displayOrder.count, section: 0)
-			peripherals[identifier] = displayData
-			displayOrder.append(identifier)
-			tableView.insertRows(at: [indexPath], with: .automatic)
 		}
 //		central.stopScan()
 	}
 
-	func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+	internal func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
 		return displayOrder.count
 	}
 	
-	func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+	internal func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
 		let cell = tableView.dequeueReusableCell(withIdentifier: "BlueToothPeripheral")!
-		let nameView = cell.textLabel
-		nameView!.text = peripherals[displayOrder[indexPath.row]]!.name
+		let peripheral = peripherals[displayOrder[indexPath.row]]!
+		let nameView = cell.textLabel!
+		nameView.text = peripheral.name
+		let detailView = cell.detailTextLabel!
+		detailView.text = "vol: \(peripheral.volume) days: \(peripheral.days)"
 		return cell
 	}
 	
+	internal func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
+		print("Location auth: \(manager.authorizationStatus.rawValue) accuracy: \(manager.accuracyAuthorization.rawValue)")
+		if manager.authorizationStatus == .notDetermined {
+			manager.requestAlwaysAuthorization()
+		} else if manager.authorizationStatus == .authorizedAlways || manager.authorizationStatus == .authorizedWhenInUse {
+//			manager.startUpdatingLocation()
+			let beaconRegion1 = CLBeaconRegion(uuid: beaconUUID1, identifier: "Beacon 1")
+			manager.startMonitoring(for: beaconRegion1)
+//				manager.startRangingBeacons(in: beaconRegion1)
+			manager.startRangingBeacons(satisfying: CLBeaconIdentityConstraint(uuid: beaconUUID1))
+			let beaconRegion2 = CLBeaconRegion(uuid: beaconUUID2, identifier: "Beacon 2")
+			manager.startMonitoring(for: beaconRegion2)
+			manager.startRangingBeacons(satisfying: CLBeaconIdentityConstraint(uuid: beaconUUID2))
+		}
+	}
+	
+	internal func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+		print("Location failed: \(error)")
+	}
+	
+	internal func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+		if let location = locations.last {
+			print("Location: \(location)")
+			print("Type: \(location.type())")
+			//Type 1: GPS?
+			//Type 4: WiFi?
+			//Type 12: Cell tower?
+		}
+	}
+	
+	internal func locationManager(_ manager: CLLocationManager, didEnterRegion region: CLRegion) {
+		print("Enter region: \(region)")
+	}
+	
+	internal func locationManager(_ manager: CLLocationManager, didExitRegion region: CLRegion) {
+		print("Exit region: \(region)")
+	}
+	
+	internal func locationManager(_ manager: CLLocationManager, monitoringDidFailFor region: CLRegion?, withError error: Error) {
+		print("Monitoring failed: \(String(describing: region)) \(error)")
+	}
+	
+	internal func locationManager(_ manager: CLLocationManager, didRange beacons: [CLBeacon], satisfying beaconConstraint: CLBeaconIdentityConstraint) {
+		if beacons.count > 0 {
+			print("Ranged beacons: \(beacons)")
+		}
+	}
+	
+	internal func locationManager(_ manager: CLLocationManager, didFailRangingFor beaconConstraint: CLBeaconIdentityConstraint, error: Error) {
+		print("Failed ranging for: \(beaconConstraint) error: \(error)")
+	}
 }
-

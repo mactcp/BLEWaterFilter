@@ -25,7 +25,7 @@ class CoreBluetoothCache: NSObject {
 	override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
 		if let change = change, let changeKind = change[.kindKey] as? UInt, changeKind == NSKeyValueChange.setting.rawValue {
 			if let changeValue = change[.newKey] as? [String: Any] {
-				print("Setting cache to: \(changeValue)")
+//				print("Setting cache to: \(changeValue)")
 				deviceCache = changeValue
 			}
 		}

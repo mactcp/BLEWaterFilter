@@ -17,6 +17,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		21D380DE260E765F0036C17C /* CLLocationPrivate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CLLocationPrivate.h; sourceTree = "<group>"; };
+		21D380E0260E769F0036C17C /* Water Filter-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Water Filter-Bridging-Header.h"; sourceTree = "<group>"; };
 		21F520842604026B00D64F8E /* Water Filter.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Water Filter.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		21F520872604026B00D64F8E /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		21F520892604026B00D64F8E /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -64,10 +66,12 @@
 				21F520892604026B00D64F8E /* SceneDelegate.swift */,
 				21F5208B2604026B00D64F8E /* ViewController.swift */,
 				21F5209E2604213400D64F8E /* CoreBluetoothCache.swift */,
+				21D380DE260E765F0036C17C /* CLLocationPrivate.h */,
 				21F5208D2604026B00D64F8E /* Main.storyboard */,
 				21F520902604026D00D64F8E /* Assets.xcassets */,
 				21F520922604026D00D64F8E /* LaunchScreen.storyboard */,
 				21F520952604026D00D64F8E /* Info.plist */,
+				21D380E0260E769F0036C17C /* Water Filter-Bridging-Header.h */,
 			);
 			path = "Water Filter";
 			sourceTree = "<group>";
@@ -103,6 +107,7 @@
 				TargetAttributes = {
 					21F520832604026B00D64F8E = {
 						CreatedOnToolsVersion = 12.4;
+						LastSwiftMigration = 1240;
 					};
 				};
 			};
@@ -292,6 +297,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = "Water Filter/WaterFilter.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = NDRUTXQVKC;
@@ -303,6 +309,8 @@
 				PRODUCT_BUNDLE_IDENTIFIER = net.mactcp.WaterFilter;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTS_MACCATALYST = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "Water Filter/Water Filter-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2,6";
 			};
@@ -313,6 +321,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = "Water Filter/WaterFilter.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = NDRUTXQVKC;
@@ -324,6 +333,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = net.mactcp.WaterFilter;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTS_MACCATALYST = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "Water Filter/Water Filter-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2,6";
 			};

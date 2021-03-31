@@ -22,6 +22,10 @@
 	<true/>
 	<key>NSBluetoothAlwaysUsageDescription</key>
 	<string>Acessing BlueTooth water filters</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Finding iBeacons</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Finding iBeacons</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
