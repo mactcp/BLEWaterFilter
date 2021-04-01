@@ -66,6 +66,8 @@ import CoreBluetooth
 <bd00000d c40f000e 5a9101> 20%
 <bd00000d c40f000e 5b9101>
 <bd00000d c40f000e 609101> 20%
+<bd00000d c40f000e 719101> 20%
+<bd00000d c40f000e 759201> 19%
 
 Advertising Address: c1:1c:4d:4f:45:a5 (c1:1c:4d:4f:45:a5)
 Manufacturer Specific: Apple (length 26, type 0xFF, 0x004C
@@ -209,9 +211,6 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
 		if let location = locations.last {
 			print("Location: \(location)")
 			print("Type: \(location.type())")
-			//Type 1: GPS?
-			//Type 4: WiFi?
-			//Type 12: Cell tower?
 		}
 	}
 	
