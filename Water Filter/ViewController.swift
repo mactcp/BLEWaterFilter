@@ -68,6 +68,19 @@ import CoreBluetooth
 <bd00000d c40f000e 609101> 20%
 <bd00000d c40f000e 719101> 20%
 <bd00000d c40f000e 759201> 19%
+<bd00000d c40f000e 849301> 19%
+<bd00000d c40f000e 879301> 19%
+<bd00000d c40f000e 8b9301>
+<bd00000d c40f000e 979401>
+<bd00000d c40f000e a39401> 18%
+<bd00000d c40f000e af9501>
+<bd00000d c40f000f 199801> 16%
+<bd00000d c40f000f 259801>
+<bd00000d c40f000f 529a01> 15%
+<bd00000d c40f000f 5b9a01> 15%
+<bd00000d c40f000f 779c01> 14%
+<bd00000d c40f000f 8d9d01> 13%
+<bd00000d c40f000f c39e01>
 
 Advertising Address: c1:1c:4d:4f:45:a5 (c1:1c:4d:4f:45:a5)
 Manufacturer Specific: Apple (length 26, type 0xFF, 0x004C
@@ -188,18 +201,29 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
 	}
 	
 	internal func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
-		print("Location auth: \(manager.authorizationStatus.rawValue) accuracy: \(manager.accuracyAuthorization.rawValue)")
-		if manager.authorizationStatus == .notDetermined {
+		var authorizationStatus: CLAuthorizationStatus
+		if #available(iOS 14.0, *) {
+			authorizationStatus = manager.authorizationStatus
+			print("Location auth: \(authorizationStatus.rawValue) accuracy: \(manager.accuracyAuthorization.rawValue)")
+		} else {
+			authorizationStatus = CLLocationManager.authorizationStatus()
+			print("Location auth: \(authorizationStatus.rawValue)")
+		}
+		if authorizationStatus == .notDetermined {
 			manager.requestAlwaysAuthorization()
-		} else if manager.authorizationStatus == .authorizedAlways || manager.authorizationStatus == .authorizedWhenInUse {
+		} else if authorizationStatus == .authorizedAlways || authorizationStatus == .authorizedWhenInUse {
 //			manager.startUpdatingLocation()
-			let beaconRegion1 = CLBeaconRegion(uuid: beaconUUID1, identifier: "Beacon 1")
-			manager.startMonitoring(for: beaconRegion1)
-//				manager.startRangingBeacons(in: beaconRegion1)
-			manager.startRangingBeacons(satisfying: CLBeaconIdentityConstraint(uuid: beaconUUID1))
-			let beaconRegion2 = CLBeaconRegion(uuid: beaconUUID2, identifier: "Beacon 2")
-			manager.startMonitoring(for: beaconRegion2)
-			manager.startRangingBeacons(satisfying: CLBeaconIdentityConstraint(uuid: beaconUUID2))
+			if #available(iOS 13.0, *) {
+				let beaconRegion1 = CLBeaconRegion(uuid: beaconUUID1, identifier: "Beacon 1")
+				manager.startMonitoring(for: beaconRegion1)
+	//				manager.startRangingBeacons(in: beaconRegion1)
+				manager.startRangingBeacons(satisfying: CLBeaconIdentityConstraint(uuid: beaconUUID1))
+				let beaconRegion2 = CLBeaconRegion(uuid: beaconUUID2, identifier: "Beacon 2")
+				manager.startMonitoring(for: beaconRegion2)
+				manager.startRangingBeacons(satisfying: CLBeaconIdentityConstraint(uuid: beaconUUID2))
+			} else {
+				// Fallback on earlier versions
+			}
 		}
 	}
 	
@@ -226,12 +250,14 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
 		print("Monitoring failed: \(String(describing: region)) \(error)")
 	}
 	
+	@available(iOS 13.0, *)
 	internal func locationManager(_ manager: CLLocationManager, didRange beacons: [CLBeacon], satisfying beaconConstraint: CLBeaconIdentityConstraint) {
 		if beacons.count > 0 {
 			print("Ranged beacons: \(beacons)")
 		}
 	}
 	
+	@available(iOS 13.0, *)
 	internal func locationManager(_ manager: CLLocationManager, didFailRangingFor beaconConstraint: CLBeaconIdentityConstraint, error: Error) {
 		print("Failed ranging for: \(beaconConstraint) error: \(error)")
 	}
