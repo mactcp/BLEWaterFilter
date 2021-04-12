@@ -81,6 +81,7 @@ import CoreBluetooth
 <bd00000d c40f000f 779c01> 14%
 <bd00000d c40f000f 8d9d01> 13%
 <bd00000d c40f000f c39e01>
+<bd00000d c40f000f ca9e01> 13%
 
 Advertising Address: c1:1c:4d:4f:45:a5 (c1:1c:4d:4f:45:a5)
 Manufacturer Specific: Apple (length 26, type 0xFF, 0x004C

@@ -53,11 +53,12 @@ class ViewController: NSViewController, NSTableViewDataSource, NSTableViewDelega
 		// Do any additional setup after loading the view.
 		central = CBCentralManager()
 		central.delegate = self
-		let displayData = WaterFilter(name: "Test", volume: 4567, days: 123)
-		let identifier = UUID()
-		peripherals[identifier] = displayData
-		displayOrder.append(identifier)
-		tableView.reloadData()
+		//Test data
+//		let displayData = WaterFilter(name: "Test", volume: 4567, days: 123)
+//		let identifier = UUID()
+//		peripherals[identifier] = displayData
+//		displayOrder.append(identifier)
+//		tableView.reloadData()
 	}
 
 	internal func centralManagerDidUpdateState(_ central: CBCentralManager) {
@@ -88,7 +89,7 @@ class ViewController: NSViewController, NSTableViewDataSource, NSTableViewDelega
 		os_log("Discovered %{public}@ %{public}@", String(describing: peripheral.name), String(describing: peripheral.identifier))
 		let identifier = peripheral.identifier
 		if let manufacturerData = advertisementData[CBAdvertisementDataManufacturerDataKey] as? Data, manufacturerData[0] == 0xbd, manufacturerData[1] == 0x00 {
-			os_log("ManufacturerData: %{public}@", String(describing: manufacturerData))
+			os_log("ManufacturerData: %{public}@", manufacturerData as NSData)
 			let name = peripheral.name ?? identifier.uuidString
 			let volume: UInt32 = (UInt32(manufacturerData[7]) << 8) | UInt32(manufacturerData[8])
 			let days = manufacturerData[9]
