@@ -98,7 +98,7 @@ class ViewController: NSViewController, NSTableViewDataSource, NSTableViewDelega
 				if displayData != currentData {
 					let displayIndex = displayOrder.firstIndex(of: identifier)!
 					peripherals[identifier] = displayData
-					tableView.reloadData(forRowIndexes: IndexSet(integer: displayIndex), columnIndexes: IndexSet(integer: 0))
+					tableView.reloadData(forRowIndexes: IndexSet(integer: displayIndex), columnIndexes: IndexSet(integersIn: 0...2))
 				}
 			} else {
 				os_log("New %{public}@ %{public}@ %@", peripheral, advertisementData, RSSI)
@@ -136,15 +136,15 @@ class ViewController: NSViewController, NSTableViewDataSource, NSTableViewDelega
 		let peripheral = peripherals[displayOrder[row]]!
 		if let identifier = tableColumn?.identifier {
 			switch identifier {
-			case ViewController.columnIdentifierName:
+			case Self.columnIdentifierName:
 				let view = tableView.makeView(withIdentifier: identifier, owner: self) as! NSTableCellView
 				view.textField!.stringValue = peripheral.name
 				return view
-			case ViewController.columnIdentifierVolume:
+			case Self.columnIdentifierVolume:
 				let view = tableView.makeView(withIdentifier: identifier, owner: self) as! NSTableCellView
 				view.textField!.stringValue = "\(peripheral.volume)"
 				return view
-			case ViewController.columnIdentifierDays:
+			case Self.columnIdentifierDays:
 				let view = tableView.makeView(withIdentifier: identifier, owner: self) as! NSTableCellView
 				view.textField!.stringValue = "\(peripheral.days)"
 				return view
