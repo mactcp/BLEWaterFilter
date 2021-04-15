@@ -68,8 +68,8 @@ class ViewController: NSViewController, NSTableViewDataSource, NSTableViewDelega
 			
 			
 			)
-//			central.scanForPeripherals(withServices: nil, options: nil)
-			central.scanForPeripherals(withServices: [aquasanaUUID], options: nil)
+//			central.scanForPeripherals(withServices: nil, options: [CBCentralManagerScanOptionAllowDuplicatesKey: true])
+			central.scanForPeripherals(withServices: [aquasanaUUID], options: [CBCentralManagerScanOptionAllowDuplicatesKey: true])
 		case .unknown:
 			os_log("CBCentral state unknown")
 		case .resetting:

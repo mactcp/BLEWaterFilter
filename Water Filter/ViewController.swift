@@ -82,6 +82,26 @@ import CoreBluetooth
 <bd00000d c40f000f 8d9d01> 13%
 <bd00000d c40f000f c39e01>
 <bd00000d c40f000f ca9e01> 13%
+<bd00000d c40f000f d39e01>
+<bd00000d c40f000f d59e01>
+<bd00000d c40f000f d69e01>
+<bd00000d c40f000f dd9e01>
+<bd00000d c40f000f e09e01>
+<bd00000d c40f000f e19e01>
+<bd00000d c40f000f e89f01>
+<bd00000d c40f000f e99f01>
+<bd00000d c40f000f ea9f01> 12%
+<bd00000d c40f000f ec9f01> 12%
+<bd00000d c40f000f ed9f01> 12%
+<bd00000d c40f000f f09f01>
+<bd00000d c40f000f f39f01>
+<bd00000d c40f000f f49f01>
+<bd00000d c40f000f fe9f01> Clear ice fill?
+<bd00000d c40f000f ff9f01> 12%
+<bd00000d c40f0010 009f01> 12%
+<bd00000d c40f0010 01a001>
+<bd00000d c40f0010 01a001>
+<bd00000d c40f0010 03a001>
 
 Advertising Address: c1:1c:4d:4f:45:a5 (c1:1c:4d:4f:45:a5)
 Manufacturer Specific: Apple (length 26, type 0xFF, 0x004C
