@@ -7,6 +7,7 @@
 
 import UIKit
 import CoreBluetooth
+import OSLog
 
 /* Aquasana AQ-5300+
  Service UUID 0xFEF8: Aplix Corporation
@@ -102,6 +103,20 @@ import CoreBluetooth
 <bd00000d c40f0010 01a001>
 <bd00000d c40f0010 01a001>
 <bd00000d c40f0010 03a001>
+<bd00000d c40f0010 06a001>
+<bd00000d c40f0010 07a001>
+<bd00000d c40f0010 09a001>
+<bd00000d c40f0010 0ca001>
+<bd00000d c40f0010 0da001>
+<bd00000d c40f0010 10a001>
+<bd00000d c40f0010 12a001>
+<bd00000d c40f0010 17a001>
+<bd00000d c40f0010 18a001>
+<bd00000d c40f0010 1aa001>
+<bd00000d c40f0010 1ba001>
+<bd00000d c40f0010 23a001>
+<bd00000d c40f0010 28a101> 11%
+
 
 Advertising Address: c1:1c:4d:4f:45:a5 (c1:1c:4d:4f:45:a5)
 Manufacturer Specific: Apple (length 26, type 0xFF, 0x004C
@@ -110,9 +125,6 @@ Data: 0215 0000000070621001b000001c4d8aa76c 0064 0001 b6
 Advertising Address: c2:1c:4d:4f:45:a5 (c2:1c:4d:4f:45:a5)
 Data: 0215 249bf7f4546c1801ba01001c4d4d98a6 000d c40f b6
 */
-
-let beaconUUID1Bytes: uuid_t = (0x00, 0x00, 0x00, 0x00, 0x70, 0x62, 0x10, 0x01, 0xb0, 0x00, 0x00, 0x1c, 0x4d, 0x8a, 0xa7, 0x6c)
-let beaconUUID2Bytes: uuid_t = (0x24, 0x9b, 0xf7, 0xf4, 0x54, 0x6c, 0x18, 0x01, 0xba, 0x01, 0x00, 0x1c, 0x4d, 0x4d, 0x98, 0xa6)
 
 struct WaterFilter: Comparable {
 	static func < (lhs: WaterFilter, rhs: WaterFilter) -> Bool {
@@ -134,8 +146,12 @@ struct WaterFilter: Comparable {
 }
 
 class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, CBCentralManagerDelegate, CLLocationManagerDelegate {
-	let beaconUUID1 = UUID(uuid: beaconUUID1Bytes)
-	let beaconUUID2 = UUID(uuid: beaconUUID2Bytes)
+	static let serviceUUID = CBUUID(data: Data([0xFE, 0xF8])) //Aplix Corporation
+	static let manufacturerID: [UInt8] = [0xbd, 0x00] //Aplix Corporation
+	static let beaconUUID1Bytes: uuid_t = (0x00, 0x00, 0x00, 0x00, 0x70, 0x62, 0x10, 0x01, 0xb0, 0x00, 0x00, 0x1c, 0x4d, 0x8a, 0xa7, 0x6c)
+	static let beaconUUID2Bytes: uuid_t = (0x24, 0x9b, 0xf7, 0xf4, 0x54, 0x6c, 0x18, 0x01, 0xba, 0x01, 0x00, 0x1c, 0x4d, 0x4d, 0x98, 0xa6)
+	static let beaconUUID1 = UUID(uuid: beaconUUID1Bytes)
+	static let beaconUUID2 = UUID(uuid: beaconUUID2Bytes)
 
 	@IBOutlet weak var tableView: UITableView!
 
@@ -143,7 +159,6 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
 	var central: CBCentralManager!
 	var peripherals: [UUID:WaterFilter] = [:]
 	var displayOrder: [UUID] = []
-	let aquasanaUUID = CBUUID(data: Data([0xFE, 0xF8]))
 
 	var locationManager: CLLocationManager!
 
@@ -165,7 +180,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
 		case .poweredOn:
 			print("CBCentral state poweredOn")
 //			central.scanForPeripherals(withServices: nil, options: nil)
-			central.scanForPeripherals(withServices: [aquasanaUUID], options: nil)
+			central.scanForPeripherals(withServices: [Self.serviceUUID], options: nil)
 		case .unknown:
 			print("CBCentral state unknown")
 		case .resetting:
@@ -182,12 +197,12 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
 	}
 
 	internal func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String : Any], rssi RSSI: NSNumber) {
-		print("Discovered \(String(describing: peripheral.name)) \(peripheral.identifier)")
+		os_log("Discovered %{public}@ %{public}@", String(describing: peripheral.name), String(describing: peripheral.identifier))
 		let identifier = peripheral.identifier
-		if let manufacturerData = advertisementData[CBAdvertisementDataManufacturerDataKey] as? Data, manufacturerData[0] == 0xbd, manufacturerData[1] == 0x00 {
-			print("ManufacturerData: \(manufacturerData)")
+		if let manufacturerData = advertisementData[CBAdvertisementDataManufacturerDataKey] as? Data, manufacturerData.starts(with: Self.manufacturerID) {
+			os_log("ManufacturerData: %{public}@", manufacturerData as NSData)
 			let name = peripheral.name ?? identifier.uuidString
-			let volume: UInt32 = (UInt32(manufacturerData[7]) << 8) | UInt32(manufacturerData[8])
+			let volume = (UInt32(manufacturerData[7]) << 8) | UInt32(manufacturerData[8])
 			let days = manufacturerData[9]
 			let displayData = WaterFilter(name: name, volume: volume, days: days)
 			if let currentData = peripherals[identifier] {
@@ -235,13 +250,13 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
 		} else if authorizationStatus == .authorizedAlways || authorizationStatus == .authorizedWhenInUse {
 //			manager.startUpdatingLocation()
 			if #available(iOS 13.0, *) {
-				let beaconRegion1 = CLBeaconRegion(uuid: beaconUUID1, identifier: "Beacon 1")
+				let beaconRegion1 = CLBeaconRegion(uuid: Self.beaconUUID1, identifier: "Beacon 1")
 				manager.startMonitoring(for: beaconRegion1)
 	//				manager.startRangingBeacons(in: beaconRegion1)
-				manager.startRangingBeacons(satisfying: CLBeaconIdentityConstraint(uuid: beaconUUID1))
-				let beaconRegion2 = CLBeaconRegion(uuid: beaconUUID2, identifier: "Beacon 2")
+				manager.startRangingBeacons(satisfying: CLBeaconIdentityConstraint(uuid: Self.beaconUUID1))
+				let beaconRegion2 = CLBeaconRegion(uuid: Self.beaconUUID2, identifier: "Beacon 2")
 				manager.startMonitoring(for: beaconRegion2)
-				manager.startRangingBeacons(satisfying: CLBeaconIdentityConstraint(uuid: beaconUUID2))
+				manager.startRangingBeacons(satisfying: CLBeaconIdentityConstraint(uuid: Self.beaconUUID2))
 			} else {
 				// Fallback on earlier versions
 			}

@@ -9,9 +9,6 @@ import Cocoa
 import CoreBluetooth
 import OSLog
 
-let beaconUUID1Bytes: uuid_t = (0x00, 0x00, 0x00, 0x00, 0x70, 0x62, 0x10, 0x01, 0xb0, 0x00, 0x00, 0x1c, 0x4d, 0x8a, 0xa7, 0x6c)
-let beaconUUID2Bytes: uuid_t = (0x24, 0x9b, 0xf7, 0xf4, 0x54, 0x6c, 0x18, 0x01, 0xba, 0x01, 0x00, 0x1c, 0x4d, 0x4d, 0x98, 0xa6)
-
 struct WaterFilter: Comparable {
 	static func < (lhs: WaterFilter, rhs: WaterFilter) -> Bool {
 		let nameComparisonResult = lhs.name.compare(rhs.name)
@@ -32,20 +29,23 @@ struct WaterFilter: Comparable {
 }
 
 class ViewController: NSViewController, NSTableViewDataSource, NSTableViewDelegate, CBCentralManagerDelegate {
+	static let serviceUUID = CBUUID(data: Data([0xFE, 0xF8])) //Aplix Corporation
+	static let manufacturerID: [UInt8] = [0xbd, 0x00] //Aplix Corporation
+//	static let beaconUUID1Bytes: uuid_t = (0x00, 0x00, 0x00, 0x00, 0x70, 0x62, 0x10, 0x01, 0xb0, 0x00, 0x00, 0x1c, 0x4d, 0x8a, 0xa7, 0x6c)
+//	static let beaconUUID2Bytes: uuid_t = (0x24, 0x9b, 0xf7, 0xf4, 0x54, 0x6c, 0x18, 0x01, 0xba, 0x01, 0x00, 0x1c, 0x4d, 0x4d, 0x98, 0xa6)
+//	static let beaconUUID1 = UUID(uuid: beaconUUID1Bytes)
+//	static let beaconUUID2 = UUID(uuid: beaconUUID2Bytes)
+
 	static let columnIdentifierName = NSUserInterfaceItemIdentifier(rawValue: "name")
 	static let columnIdentifierVolume = NSUserInterfaceItemIdentifier(rawValue: "volume")
 	static let columnIdentifierDays = NSUserInterfaceItemIdentifier(rawValue: "days")
 
 	@IBOutlet weak var tableView: NSTableView!
 
-	let beaconUUID1 = UUID(uuid: beaconUUID1Bytes)
-	let beaconUUID2 = UUID(uuid: beaconUUID2Bytes)
-
 	let bluetoothCache = CoreBluetoothCache()
 	var central: CBCentralManager!
 	var peripherals: [UUID:WaterFilter] = [:]
 	var displayOrder: [UUID] = []
-	let aquasanaUUID = CBUUID(data: Data([0xFE, 0xF8]))
 
 	override func viewDidLoad() {
 		super.viewDidLoad()
@@ -68,8 +68,8 @@ class ViewController: NSViewController, NSTableViewDataSource, NSTableViewDelega
 			
 			
 			)
-//			central.scanForPeripherals(withServices: nil, options: [CBCentralManagerScanOptionAllowDuplicatesKey: true])
-			central.scanForPeripherals(withServices: [aquasanaUUID], options: [CBCentralManagerScanOptionAllowDuplicatesKey: true])
+//			central.scanForPeripherals(withServices: nil, options: nil)
+			central.scanForPeripherals(withServices: [Self.serviceUUID], options: nil)
 		case .unknown:
 			os_log("CBCentral state unknown")
 		case .resetting:
@@ -88,10 +88,10 @@ class ViewController: NSViewController, NSTableViewDataSource, NSTableViewDelega
 	internal func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String : Any], rssi RSSI: NSNumber) {
 		os_log("Discovered %{public}@ %{public}@", String(describing: peripheral.name), String(describing: peripheral.identifier))
 		let identifier = peripheral.identifier
-		if let manufacturerData = advertisementData[CBAdvertisementDataManufacturerDataKey] as? Data, manufacturerData[0] == 0xbd, manufacturerData[1] == 0x00 {
+		if let manufacturerData = advertisementData[CBAdvertisementDataManufacturerDataKey] as? Data, manufacturerData.starts(with: Self.manufacturerID) {
 			os_log("ManufacturerData: %{public}@", manufacturerData as NSData)
 			let name = peripheral.name ?? identifier.uuidString
-			let volume: UInt32 = (UInt32(manufacturerData[7]) << 8) | UInt32(manufacturerData[8])
+			let volume = (UInt32(manufacturerData[7]) << 8) | UInt32(manufacturerData[8])
 			let days = manufacturerData[9]
 			let displayData = WaterFilter(name: name, volume: volume, days: days)
 			if let currentData = peripherals[identifier] {
