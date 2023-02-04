@@ -2,7 +2,7 @@
 //  ViewController.swift
 //  WaterFilter
 //
-//  Created by Glenn on 3/18/21.
+//  Created by Glenn Anderson on 3/18/21.
 //
 
 import UIKit
@@ -116,7 +116,76 @@ import OSLog
 <bd00000d c40f0010 1ba001>
 <bd00000d c40f0010 23a001>
 <bd00000d c40f0010 28a101> 11%
+<bd00000d c40f0010 2ba101>
+<bd00000d c40f0010 2da101>
+<bd00000d c40f0010 31a101>
+<bd00000d c40f0010 34a101>
+<bd00000d c40f0010 36a101>
+<bd00000d c40f0010 52a201>
+<bd00000d c40f0010 71a301> 10%
+<bd00000d c40f0010 8ca401>
+<bd00000d c40f0010 93a501> 9%
+<bd00000d c40f0010 96a501>
+<bd00000d c40f0010 97a501>
+<bd00000d c40f0010 a0a501> 1l
+<bd00000d c40f0010 a8a501> 1l
+<bd00000d c40f0010 b1a501> 1l
+<bd00000d c40f0010 b9a501> 1l
+<bd00000d c40f0010 bba501>
+<bd00000d c40f0010 c6a601> 8%
+<bd00000d c40f0010 eca601>
+<bd00000d c40f0010 fca701>
+<bd00000d c40f0011 0ca801> 7%
+<bd00000d c40f0011 21a901> 7%
+<bd00000d c40f0011 49aa01>
+<bd00000d c40f0111 4dab01>
+<bd00000d c40f0111 50ab01> 5% beeping
+<bd00000d c40f0111 62ac01> 5% beeping
+<bd00000d c40f0111 70ad01> 4% beeping
+<bd00000d c40f0111 93ae01> 4% beeping
+<bd00000d c40f0111 abaf01> 3% beeping
+<bd00000d c40f0111 c1b001> 3% beeping
+<bd00000d c40f0111 e0b101> 2% beeping
+<bd00000d c40f0111 f3b201> 2% beeping
+<bd00000d c40f0111 ffb301> 1% beeping
+<bd00000d c40f0112 0cb401> 1% beeping
+<bd00000d c40f0112 2cb501> "Filter Life Expired" beeping
+<bd00000d c40f0112 57b701>
+<bd00000d c40f0112 41b601>
+<bd00000d c40f0112 aeb901>
+<bd00000d c40f0112 bfba01>
+<bd00000d c40f0112 d8bb01>
+<bd00000d c40f0112 eebc01>
+<bd00000d c40f0112 fbbd01>
+<bd00000d c40f0113 1abe01>
+<bd00000d c40f0113 48c701>
+<bd00000d c40f0113 81c901>
+<bd00000d c40f0113 83ca01>
+<bd00000d c40f0113 a5cb01>
+<bd00000d c40f0113 bccc01>
+<bd00000d c40f0114 02cf01>
+<bd00000d c40f0114 32d101>
+<bd00000d c40f0114 49d201>
+<bd00000d c40f0115 7be001>
+<bd00000d c40f0117 85f401>
+<bd00000d c40f0117 f1f801>
+<bd00000d c40f0118 36fa01>
+<bd00000d c40f0118 5dfc01>
+<bd00000d c40f0118 8efe01>
+<bd00000d c40f0118 95ff01>
+<bd00000d c40f0118 a9ff01>
+<bd00000d c40f0119 0dff01>
 
+<bd00000d c40f0000 030001>
+<bd00000d c40f0000 6a0001>
+<bd00000d c40f0002 030001> ~37l
+<bd00000d c40f0002 060001> glass of water with ice
+<bd00000d c40f0002 680201>
+M/M  ^^^^ ^^^^
+beeping flag  ^^
+Water volume    ^^ ^^
+Days                 ^^
+Unknown                ^^
 
 Advertising Address: c1:1c:4d:4f:45:a5 (c1:1c:4d:4f:45:a5)
 Manufacturer Specific: Apple (length 26, type 0xFF, 0x004C
@@ -124,6 +193,8 @@ Data: 0215 0000000070621001b000001c4d8aa76c 0064 0001 b6
 
 Advertising Address: c2:1c:4d:4f:45:a5 (c2:1c:4d:4f:45:a5)
 Data: 0215 249bf7f4546c1801ba01001c4d4d98a6 000d c40f b6
+                                            ^^^^ ^^^^
+  major and minor match start of Aplix vendor data
 */
 
 struct WaterFilter: Comparable {
@@ -155,7 +226,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
 
 	@IBOutlet weak var tableView: UITableView!
 
-	let bluetoothCache = CoreBluetoothCache()
+	//let bluetoothCache = CoreBluetoothCache()
 	var central: CBCentralManager!
 	var peripherals: [UUID:WaterFilter] = [:]
 	var displayOrder: [UUID] = []

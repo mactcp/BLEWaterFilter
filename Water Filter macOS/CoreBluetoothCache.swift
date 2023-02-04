@@ -2,7 +2,7 @@
 //  CoreBluetoothCache.swift
 //  WaterFilter
 //
-//  Created by Glenn on 3/18/21.
+//  Created by Glenn Anderson on 3/18/21.
 //
 
 import Foundation
@@ -32,7 +32,7 @@ class CoreBluetoothCache: NSObject {
 	}
 	
 	public func deviceAddress(for uuid: UUID) -> String? {
-		guard let tempCache = deviceCache, let deviceRecord = tempCache[uuid.uuidString] as? Dictionary<String,Any> else {
+		guard let deviceCache = deviceCache, let deviceRecord = deviceCache[uuid.uuidString] as? Dictionary<String,Any> else {
 			return nil
 		}
 		return deviceRecord["DeviceAddress"] as? String
