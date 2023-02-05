@@ -2,7 +2,7 @@
 //  AppDelegate.swift
 //  WaterFilter
 //
-//  Created by Glenn on 4/11/21.
+//  Created by Glenn Anderson on 4/11/2021.
 //
 
 import Cocoa

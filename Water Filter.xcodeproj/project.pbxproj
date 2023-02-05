@@ -269,6 +269,8 @@
 				DEVELOPMENT_TEAM = NDRUTXQVKC;
 				ENABLE_HARDENED_RUNTIME = YES;
 				INFOPLIST_FILE = "Water Filter macOS/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Bluetooth Water Filter";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -295,6 +297,8 @@
 				DEVELOPMENT_TEAM = NDRUTXQVKC;
 				ENABLE_HARDENED_RUNTIME = YES;
 				INFOPLIST_FILE = "Water Filter macOS/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Bluetooth Water Filter";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
