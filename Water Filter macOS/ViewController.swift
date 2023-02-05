@@ -39,17 +39,17 @@ class ViewController: NSViewController, NSTableViewDataSource, NSTableViewDelega
 	@IBOutlet weak var tableView: NSTableView!
 	@IBOutlet weak var bluetoothStatusLabel: NSTextField!
 
-	static let serviceUUID = CBUUID(data: Data([0xFE, 0xF8])) //Aplix Corporation
-	static let manufacturerID: [UInt8] = [0xbd, 0x00] //Aplix Corporation
-//	static let beaconUUID1Bytes: uuid_t = (0x00, 0x00, 0x00, 0x00, 0x70, 0x62, 0x10, 0x01, 0xb0, 0x00, 0x00, 0x1c, 0x4d, 0x8a, 0xa7, 0x6c)
-//	static let beaconUUID2Bytes: uuid_t = (0x24, 0x9b, 0xf7, 0xf4, 0x54, 0x6c, 0x18, 0x01, 0xba, 0x01, 0x00, 0x1c, 0x4d, 0x4d, 0x98, 0xa6)
-//	static let beaconUUID1 = UUID(uuid: beaconUUID1Bytes)
-//	static let beaconUUID2 = UUID(uuid: beaconUUID2Bytes)
+	let serviceUUID = CBUUID(data: Data([0xFE, 0xF8])) //Aplix Corporation
+	let manufacturerID: [UInt8] = [0xbd, 0x00] //Aplix Corporation
+//	let beaconUUID1Bytes: uuid_t = (0x00, 0x00, 0x00, 0x00, 0x70, 0x62, 0x10, 0x01, 0xb0, 0x00, 0x00, 0x1c, 0x4d, 0x8a, 0xa7, 0x6c)
+//	let beaconUUID2Bytes: uuid_t = (0x24, 0x9b, 0xf7, 0xf4, 0x54, 0x6c, 0x18, 0x01, 0xba, 0x01, 0x00, 0x1c, 0x4d, 0x4d, 0x98, 0xa6)
+//	let beaconUUID1 = UUID(uuid: beaconUUID1Bytes)
+//	let beaconUUID2 = UUID(uuid: beaconUUID2Bytes)
 
-	static let columnIdentifierName = NSUserInterfaceItemIdentifier(rawValue: "name")
-	static let columnIdentifierVolume = NSUserInterfaceItemIdentifier(rawValue: "volume")
-	static let columnIdentifierDays = NSUserInterfaceItemIdentifier(rawValue: "days")
-	static let columnIdentifierUpdate = NSUserInterfaceItemIdentifier(rawValue: "update")
+	let columnIdentifierName = NSUserInterfaceItemIdentifier(rawValue: "name")
+	let columnIdentifierVolume = NSUserInterfaceItemIdentifier(rawValue: "volume")
+	let columnIdentifierDays = NSUserInterfaceItemIdentifier(rawValue: "days")
+	let columnIdentifierUpdate = NSUserInterfaceItemIdentifier(rawValue: "update")
 
 	let dateFormatter = DateFormatter()
 	
@@ -132,7 +132,7 @@ class ViewController: NSViewController, NSTableViewDataSource, NSTableViewDelega
 		case .poweredOn:
 			os_log("CBCentral state poweredOn")
 //			central.scanForPeripherals(withServices: nil, options: nil)
-			central.scanForPeripherals(withServices: [Self.serviceUUID], options: nil)
+			central.scanForPeripherals(withServices: [serviceUUID], options: nil)
 		case .unknown:
 			os_log("CBCentral state unknown")
 		case .resetting:
@@ -164,7 +164,7 @@ class ViewController: NSViewController, NSTableViewDataSource, NSTableViewDelega
 	internal func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String : Any], rssi RSSI: NSNumber) {
 		os_log("Discovered %{public}@ %{public}@", String(describing: peripheral.name), String(describing: peripheral.identifier))
 		let identifier = peripheral.identifier
-		if let manufacturerData = advertisementData[CBAdvertisementDataManufacturerDataKey] as? Data, manufacturerData.starts(with: Self.manufacturerID) {
+		if let manufacturerData = advertisementData[CBAdvertisementDataManufacturerDataKey] as? Data, manufacturerData.starts(with: manufacturerID) {
 			os_log("ManufacturerData: %{public}@", manufacturerData as NSData)
 			let volume = (UInt32(manufacturerData[7]) << 8) | UInt32(manufacturerData[8])
 			let days = manufacturerData[9]
@@ -220,22 +220,22 @@ class ViewController: NSViewController, NSTableViewDataSource, NSTableViewDelega
 		}
 		let peripheral = peripherals[displayOrder[row]]!
 		switch identifier {
-		case Self.columnIdentifierName:
+		case columnIdentifierName:
 			let view = tableView.makeView(withIdentifier: identifier, owner: self) as! NSTableCellView
 			let textField = view.textField!
 			textField.stringValue = peripheral.name
 			textField.delegate = self
 			view.toolTip = peripheral.macAddress
 			return view
-		case Self.columnIdentifierVolume:
+		case columnIdentifierVolume:
 			let view = tableView.makeView(withIdentifier: identifier, owner: self) as! NSTableCellView
 			view.textField!.stringValue = "\(peripheral.volume)"
 			return view
-		case Self.columnIdentifierDays:
+		case columnIdentifierDays:
 			let view = tableView.makeView(withIdentifier: identifier, owner: self) as! NSTableCellView
 			view.textField!.stringValue = "\(peripheral.days)"
 			return view
-		case Self.columnIdentifierUpdate:
+		case columnIdentifierUpdate:
 			let view = tableView.makeView(withIdentifier: identifier, owner: self) as! NSTableCellView
 			view.textField!.stringValue = dateFormatter.string(from: peripheral.lastUpdate)
 			return view
