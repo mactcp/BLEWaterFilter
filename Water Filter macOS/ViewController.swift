@@ -33,6 +33,12 @@ struct WaterFilter {
 	var days: UInt8
 	var lastUpdate: Date
 	var macAddress: String?
+	
+	mutating func update(volume newVolume: UInt32, days newDays: UInt8, lastUpdate newUpdate: Date) {
+		volume = newVolume
+		days = newDays
+		lastUpdate = newUpdate
+	}
 }
 
 class ViewController: NSViewController, NSTableViewDataSource, NSTableViewDelegate, CBCentralManagerDelegate, NSTextFieldDelegate {
@@ -80,17 +86,7 @@ class ViewController: NSViewController, NSTableViewDataSource, NSTableViewDelega
 		}
 	}
 	
-	override func viewDidLoad() {
-		super.viewDidLoad()
-
-		dateFormatter.dateStyle = .medium
-		dateFormatter.timeStyle = .medium
-
-		central = CBCentralManager()
-		central.delegate = self
-		updateCentralState()
-
-		//Load water filters from defaults
+	private func loadWaterFilters() {
 		if let waterFilters = UserDefaults.standard.object(forKey: kDefaultsWaterFilters) as? [[String : Any]] {
 			for waterFilter in waterFilters {
 				let identifierData = waterFilter[kDefaultsWaterFilterID] as! Data
@@ -111,8 +107,9 @@ class ViewController: NSViewController, NSTableViewDataSource, NSTableViewDelega
 				tableView.reloadData()
 			}
 		}
-
-		/*//Test data
+	}
+	
+	/*private func loadTestData() {
 		let displayData = WaterFilter(name: "Test", volume: 4567, days: 123, lastUpdate: Date(), macAddress: "01:23:45:67:89:AB")
 		let identifier = UUID()
 		peripherals[identifier] = displayData
@@ -123,7 +120,22 @@ class ViewController: NSViewController, NSTableViewDataSource, NSTableViewDelega
 		peripherals[identifier2] = displayData2
 		displayOrder.append(identifier2)
 		
-		tableView.reloadData()*/
+		tableView.reloadData()
+	}*/
+	
+	override func viewDidLoad() {
+		super.viewDidLoad()
+
+		dateFormatter.dateStyle = .medium
+		dateFormatter.timeStyle = .medium
+
+		central = CBCentralManager()
+		central.delegate = self
+		updateCentralState()
+
+		loadWaterFilters()
+		
+		//loadTestData()
 	}
 
 	internal func centralManagerDidUpdateState(_ central: CBCentralManager) {
@@ -170,25 +182,21 @@ class ViewController: NSViewController, NSTableViewDataSource, NSTableViewDelega
 			let days = manufacturerData[9]
 			let lastUpdate = Date()
 			if peripherals[identifier] != nil {
-				peripherals[identifier]!.volume = volume
-				peripherals[identifier]!.days = days
-				peripherals[identifier]!.lastUpdate = lastUpdate
+				peripherals[identifier]!.update(volume: volume, days: days, lastUpdate: lastUpdate)
 				let displayIndex = displayOrder.firstIndex(of: identifier)!
 				tableView.reloadData(forRowIndexes: IndexSet(integer: displayIndex), columnIndexes: IndexSet(integersIn: 1...3))
-				saveWaterFilters()
 			} else {
 				//TODO: better default name when no name
 				let macAddress = bluetoothCache.deviceAddress(for: identifier)
 				let defaultName = "Unknown " + ((macAddress != nil) ? macAddress! : identifier.uuidString)
 				let name = peripheral.name?.count ?? 0 > 0 ? peripheral.name! : defaultName
 				os_log("New %{public}@ %{public}@ %@", peripheral, advertisementData, RSSI)
-				let displayData = WaterFilter(name: name, volume: volume, days: days, lastUpdate: lastUpdate, macAddress: macAddress)
-				peripherals[identifier] = displayData
+				peripherals[identifier] = WaterFilter(name: name, volume: volume, days: days, lastUpdate: lastUpdate, macAddress: macAddress)
 				let displayIndex = displayOrder.count
 				displayOrder.append(identifier)
 				tableView.insertRows(at: IndexSet(integer:displayIndex), withAnimation: .effectFade)
-				saveWaterFilters()
 			}
+			saveWaterFilters()
 		}
 //		central.stopScan()
 	}
@@ -218,14 +226,15 @@ class ViewController: NSViewController, NSTableViewDataSource, NSTableViewDelega
 		guard let identifier = tableColumn?.identifier else {
 			return nil
 		}
-		let peripheral = peripherals[displayOrder[row]]!
+		let btIdentifier = displayOrder[row]
+		let peripheral = peripherals[btIdentifier]!
 		switch identifier {
 		case columnIdentifierName:
 			let view = tableView.makeView(withIdentifier: identifier, owner: self) as! NSTableCellView
 			let textField = view.textField!
 			textField.stringValue = peripheral.name
 			textField.delegate = self
-			view.toolTip = peripheral.macAddress
+			view.toolTip = peripheral.macAddress ?? btIdentifier.uuidString
 			return view
 		case columnIdentifierVolume:
 			let view = tableView.makeView(withIdentifier: identifier, owner: self) as! NSTableCellView
