@@ -3,18 +3,8 @@
 //  WaterFilter
 //
 //  Created by Glenn Anderson on 4/11/2021.
+//  © Copyright 2021-2023 Glenn Anderson
 //
-
-/* TODO:
- √ Show something for BlueTooth not authorized
- √ Show something for BlueTooth turned off
- √ Save and restore data
- √ Edit name
- * Default name
- * MAC address tool tip
- • Remove filter
- • Scanning mode?
- */
 
 import Cocoa
 import CoreBluetooth
@@ -33,6 +23,7 @@ struct WaterFilter {
 	var days: UInt8
 	var lastUpdate: Date
 	var macAddress: String?
+	var peripheral: CBPeripheral?
 	
 	mutating func update(volume newVolume: UInt32, days newDays: UInt8, lastUpdate newUpdate: Date) {
 		volume = newVolume
@@ -41,7 +32,7 @@ struct WaterFilter {
 	}
 }
 
-class ViewController: NSViewController, NSTableViewDataSource, NSTableViewDelegate, CBCentralManagerDelegate, NSTextFieldDelegate {
+class ViewController: NSViewController, NSTableViewDataSource, NSTableViewDelegate, NSTextFieldDelegate, CBCentralManagerDelegate, CBPeripheralDelegate {
 	@IBOutlet weak var tableView: NSTableView!
 	@IBOutlet weak var bluetoothStatusLabel: NSTextField!
 
@@ -85,21 +76,27 @@ class ViewController: NSViewController, NSTableViewDataSource, NSTableViewDelega
 			bluetoothStatusLabel.stringValue = "Bluetooth state unknown"
 		}
 	}
-	
+
 	private func loadWaterFilters() {
 		if let waterFilters = UserDefaults.standard.object(forKey: kDefaultsWaterFilters) as? [[String : Any]] {
 			for waterFilter in waterFilters {
-				let identifierData = waterFilter[kDefaultsWaterFilterID] as! Data
+				guard let identifierData = waterFilter[kDefaultsWaterFilterID] as? Data else {
+					continue
+				}
+				guard identifierData.count == MemoryLayout<uuid_t>.size else {
+					continue
+				}
 				let identifier = identifierData.withUnsafeBytes { buffer in
 					buffer.withMemoryRebound(to: uuid_t.self) { buffer in
 						UUID(uuid: buffer.baseAddress!.pointee)
 					}
 				}
+				let peripheral = central.retrievePeripherals(withIdentifiers: [identifier]).first
 				let name = waterFilter[kDefaultsWaterFilterName] as! String
 				let volume = waterFilter[kDefaultsWaterFilterVolume] as! UInt32
 				let days = waterFilter[kDefaultsWaterFilterDays] as! UInt8
 				let lastUpdate = waterFilter[kDefaultsWaterFilterLastUpdate] as! Date
-				let displayData = WaterFilter(name: name, volume: volume, days: days, lastUpdate: lastUpdate, macAddress: bluetoothCache.deviceAddress(for: identifier))
+				let displayData = WaterFilter(name: name, volume: volume, days: days, lastUpdate: lastUpdate, macAddress: bluetoothCache.deviceAddress(for: identifier), peripheral: peripheral)
 				peripherals[identifier] = displayData
 				displayOrder.append(identifier)
 			}
@@ -108,7 +105,7 @@ class ViewController: NSViewController, NSTableViewDataSource, NSTableViewDelega
 			}
 		}
 	}
-	
+
 	/*private func loadTestData() {
 		let displayData = WaterFilter(name: "Test", volume: 4567, days: 123, lastUpdate: Date(), macAddress: "01:23:45:67:89:AB")
 		let identifier = UUID()
@@ -122,20 +119,30 @@ class ViewController: NSViewController, NSTableViewDataSource, NSTableViewDelega
 		
 		tableView.reloadData()
 	}*/
-	
+
 	override func viewDidLoad() {
 		super.viewDidLoad()
 
 		dateFormatter.dateStyle = .medium
 		dateFormatter.timeStyle = .medium
 
-		central = CBCentralManager()
+//		central = CBCentralManager()
+		central = CBCentralManager(delegate: self, queue: DispatchQueue.main, options:[CBCentralManagerOptionRestoreIdentifierKey:"waterFilters"])
 		central.delegate = self
 		updateCentralState()
 
 		loadWaterFilters()
 		
 		//loadTestData()
+		NotificationCenter.default.addObserver(self, selector: #selector(currentLocalDidChange), name: NSLocale.currentLocaleDidChangeNotification, object: nil)
+	}
+
+	func centralManager(_ central: CBCentralManager, willRestoreState dict: [String : Any]) {
+		print("willRestoreState: \(dict)")
+	}
+
+	@objc func currentLocalDidChange(_ notification: Notification) {
+		print("currentLocalDidChange")
 	}
 
 	internal func centralManagerDidUpdateState(_ central: CBCentralManager) {
@@ -143,7 +150,7 @@ class ViewController: NSViewController, NSTableViewDataSource, NSTableViewDelega
 		switch central.state {
 		case .poweredOn:
 			os_log("CBCentral state poweredOn")
-//			central.scanForPeripherals(withServices: nil, options: nil)
+			//central.scanForPeripherals(withServices: nil, options: nil)
 			central.scanForPeripherals(withServices: [serviceUUID], options: nil)
 		case .unknown:
 			os_log("CBCentral state unknown")
@@ -159,7 +166,7 @@ class ViewController: NSViewController, NSTableViewDataSource, NSTableViewDelega
 			os_log("CBCentral state unknown")
 		}
 	}
-	
+
 	private func saveWaterFilters() {
 		var waterFilters = [[String : Any]]()
 		for identifier in displayOrder {
@@ -174,15 +181,27 @@ class ViewController: NSViewController, NSTableViewDataSource, NSTableViewDelega
 	}
 
 	internal func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String : Any], rssi RSSI: NSNumber) {
-		os_log("Discovered %{public}@ %{public}@", String(describing: peripheral.name), String(describing: peripheral.identifier))
 		let identifier = peripheral.identifier
-		if let manufacturerData = advertisementData[CBAdvertisementDataManufacturerDataKey] as? Data, manufacturerData.starts(with: manufacturerID) {
-			os_log("ManufacturerData: %{public}@", manufacturerData as NSData)
+		os_log("Discovered %{public}@ %{public}@", String(describing: peripheral.name), String(describing: identifier))
+		guard let manufacturerData = advertisementData[CBAdvertisementDataManufacturerDataKey] as? Data else {
+			return
+		}
+		os_log("ManufacturerData: %{public}@", manufacturerData as NSData)
+		os_log("State: %d", peripheral.state.rawValue)
+		if manufacturerData.starts(with: manufacturerID) {
+			peripheral.delegate = self
+			if peripheral.state == .disconnected {
+				os_log("Connecting...")
+				central.connect(peripheral)
+			}
 			let volume = (UInt32(manufacturerData[7]) << 8) | UInt32(manufacturerData[8])
 			let days = manufacturerData[9]
 			let lastUpdate = Date()
 			if peripherals[identifier] != nil {
 				peripherals[identifier]!.update(volume: volume, days: days, lastUpdate: lastUpdate)
+				if peripherals[identifier]!.peripheral == nil {
+					peripherals[identifier]!.peripheral = peripheral
+				}
 				let displayIndex = displayOrder.firstIndex(of: identifier)!
 				tableView.reloadData(forRowIndexes: IndexSet(integer: displayIndex), columnIndexes: IndexSet(integersIn: 1...3))
 			} else {
@@ -191,7 +210,7 @@ class ViewController: NSViewController, NSTableViewDataSource, NSTableViewDelega
 				let defaultName = "Unknown " + ((macAddress != nil) ? macAddress! : identifier.uuidString)
 				let name = peripheral.name?.count ?? 0 > 0 ? peripheral.name! : defaultName
 				os_log("New %{public}@ %{public}@ %@", peripheral, advertisementData, RSSI)
-				peripherals[identifier] = WaterFilter(name: name, volume: volume, days: days, lastUpdate: lastUpdate, macAddress: macAddress)
+				peripherals[identifier] = WaterFilter(name: name, volume: volume, days: days, lastUpdate: lastUpdate, macAddress: macAddress, peripheral: peripheral)
 				let displayIndex = displayOrder.count
 				displayOrder.append(identifier)
 				tableView.insertRows(at: IndexSet(integer:displayIndex), withAnimation: .effectFade)
@@ -201,6 +220,17 @@ class ViewController: NSViewController, NSTableViewDataSource, NSTableViewDelega
 //		central.stopScan()
 	}
 
+	internal func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
+		os_log("centralManager:didConnect")
+	}
+
+	internal func centralManager(_ central: CBCentralManager, didFailToConnect peripheral: CBPeripheral, error: Error?) {
+		os_log("centralManager:didFailToConnect:error %{public}@", String(describing: error))
+	}
+
+	internal func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: Error?) {
+		os_log("centralManager:didDisconnectPeripheral:error %{public}@", String(describing: error))
+	}
 
 	internal func numberOfRows(in tableView: NSTableView) -> Int {
 		return displayOrder.count
@@ -271,3 +301,19 @@ class ViewController: NSViewController, NSTableViewDataSource, NSTableViewDelega
 		}
 	}
 }
+
+/*extension ViewController: NSUserInterfaceValidations {
+	@MainActor func validateUserInterfaceItem(_ item: NSValidatedUserInterfaceItem) -> Bool {
+		print("ViewController validateUserInterfaceItem: \(item)")
+		switch item.action {
+
+		case #selector(NSText.delete(_:))?:
+				// Put your real test here.
+				//return !textField.stringValue.isEmpty
+			return true
+
+		default:
+			return false
+		}
+	}
+}*/

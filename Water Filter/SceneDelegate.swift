@@ -2,7 +2,8 @@
 //  SceneDelegate.swift
 //  WaterFilter
 //
-//  Created by Glenn on 3/18/21.
+//  Created by Glenn Anderson on 3/18/2021.
+//  © Copyright 2021-2023 Glenn Anderson
 //
 
 import UIKit
