@@ -8,8 +8,8 @@
 
 import UIKit
 import CoreBluetooth
-import OSLog
 import CoreLocation
+import OSLog
 
 struct WaterFilter: Comparable {
 	static func < (lhs: WaterFilter, rhs: WaterFilter) -> Bool {
@@ -156,7 +156,6 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
 	internal func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
 		if let location = locations.last {
 			print("Location: \(location)")
-			print("Type: \(location.type())")
 		}
 	}
 	

@@ -15,7 +15,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 		// Insert code here to initialize your application
 		if let options = aNotification.userInfo {
 			print("launch options: \(options)")
-			let centralManagerIdentifiers = options[NSApplication.launchIsDefaultUserInfoKey]
 		}
 	}
 
